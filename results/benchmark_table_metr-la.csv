@@ -1,0 +1,4 @@
+Algorithm,Mean time (s),Median time (s),Mean speedup,Mean modularity Q,Mean #communities,Q vs Static (%),Mean frontier frac
+Static Louvain,0.1556,0.1692,1.0x,0.6570,30.5,—,
+ND Louvain,0.0542,0.0104,14.9x,0.6194,5.6,-5.7%,
+DF Louvain,0.0111,0.0105,15.7x,0.6083,5.6,-7.4%,0.951
