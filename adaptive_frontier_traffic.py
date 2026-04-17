@@ -67,7 +67,6 @@ LABELS = {
     "af": "Adaptive Frontier (AF)",
 }
 
-
 def load_snap_roadnet(edge_path: str, max_nodes: int = 2000) -> np.ndarray:
     """
     Load SNAP road network edge list and build an undirected adjacency.
@@ -112,7 +111,6 @@ def load_snap_roadnet(edge_path: str, max_nodes: int = 2000) -> np.ndarray:
     print(f"  SNAP roadnet: nodes={n}, edges={n_edges}, density={n_edges / max(n*(n-1)/2,1):.6f}")
     return A
 
-
 def synthetic_traffic(T: int, N: int, seed: int = 42) -> Tuple[np.ndarray, np.ndarray]:
     """Generate synthetic traffic-like speeds for SNAP road networks."""
     rng = np.random.default_rng(seed)
@@ -123,7 +121,6 @@ def synthetic_traffic(T: int, N: int, seed: int = 42) -> Tuple[np.ndarray, np.nd
     speeds = np.clip(speeds, 0, 80)
     timestamps = np.arange(T) * 300
     return speeds, timestamps
-
 
 def _adaptive_frontier_mask(
     W_old: np.ndarray,
@@ -174,7 +171,6 @@ def _adaptive_frontier_mask(
         affected = mask
 
     return affected, thr
-
 
 def louvain_af(
     W_new: np.ndarray,
@@ -260,7 +256,6 @@ def louvain_af(
     partition = np.array([mapping[l] for l in partition], dtype=np.int32)
     return partition, int(affected.sum()), thr
 
-
 def run_benchmark(
     speeds: np.ndarray,
     timestamps: np.ndarray,
@@ -304,7 +299,7 @@ def run_benchmark(
     partition_af = partition_static.copy()
     W_prev = W_cur.copy()
 
-    print(f"  Running {n_batches} batches (window={{window}}, batch={{batch_size}}, N={{N}})...")
+    print(f"  Running {n_batches} batches (window={window}, batch={batch_size}, N={N})...")
     for b in tqdm(range(n_batches), desc="  Batches", ncols=70):
         t_end = t0 + (b + 1) * batch_size
         t_start = t_end - window
@@ -373,7 +368,6 @@ def run_benchmark(
 
     return results
 
-
 def plot_modularity(results: dict, dataset_name: str):
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 7), sharex=True)
 
@@ -385,7 +379,7 @@ def plot_modularity(results: dict, dataset_name: str):
                  color=COLORS[algo], label=LABELS[algo], linewidth=1.4, alpha=0.85)
 
     ax1.set_ylabel("Modularity Q", fontsize=11)
-    ax1.set_title(f"{{dataset_name}} — Modularity over time", fontsize=12)
+    ax1.set_title(f"{dataset_name} — Modularity over time", fontsize=12)
     ax1.legend(fontsize=9); ax1.grid(True, alpha=0.3)
 
     ax2.set_ylabel("#Communities", fontsize=11)
@@ -394,11 +388,10 @@ def plot_modularity(results: dict, dataset_name: str):
     ax2.legend(fontsize=9); ax2.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    path = f"results/modularity_over_time_{{dataset_name}}.png"
+    path = f"results/modularity_over_time_{dataset_name}.png"
     plt.savefig(path, dpi=150, bbox_inches="tight")
     plt.close()
-    print(f"  Saved -> {{path}}")
-
+    print(f"  Saved -> {path}")
 
 def plot_speedup(results: dict, dataset_name: str):
     fig, axes = plt.subplots(1, 3, figsize=(16, 5))
@@ -410,19 +403,18 @@ def plot_speedup(results: dict, dataset_name: str):
         ax.axhline(1.0, color="#888", linewidth=0.8, linestyle="--")
         mean_sp = np.mean(sp)
         ax.axhline(mean_sp, color=COLORS[algo], linewidth=1.0, linestyle=":",
-                   alpha=0.7, label=f"Mean speedup = {{mean_sp:.1f}}x")
-        ax.set_title(f"{{LABELS[algo]}} vs Static — speedup", fontsize=10)
+                   alpha=0.7, label=f"Mean speedup = {mean_sp:.1f}x")
+        ax.set_title(f"{LABELS[algo]} vs Static — speedup", fontsize=10)
         ax.set_xlabel("Batch", fontsize=10)
         ax.set_ylabel("Speedup (×)", fontsize=10)
         ax.legend(fontsize=8); ax.grid(True, alpha=0.3)
 
-    plt.suptitle(f"{{dataset_name}} — Runtime speedup over Static Louvain", fontsize=12)
+    plt.suptitle(f"{dataset_name} — Runtime speedup over Static Louvain", fontsize=12)
     plt.tight_layout()
-    path = f"results/speedup_comparison_{{dataset_name}}.png"
+    path = f"results/speedup_comparison_{dataset_name}.png"
     plt.savefig(path, dpi=150, bbox_inches="tight")
     plt.close()
-    print(f"  Saved -> {{path}}")
-
+    print(f"  Saved -> {path}")
 
 def plot_community_evolution(results: dict, dataset_name: str):
     fig, ax = plt.subplots(figsize=(12, 4))
@@ -432,14 +424,13 @@ def plot_community_evolution(results: dict, dataset_name: str):
     ax.fill_between(batches, nc, alpha=0.15, color=COLORS["af"], step="post")
     ax.set_xlabel("Batch (5-min timestep)", fontsize=11)
     ax.set_ylabel("#Communities (AF)", fontsize=11)
-    ax.set_title(f"{{dataset_name}} — Community count evolution (Adaptive Frontier)", fontsize=12)
+    ax.set_title(f"{dataset_name} — Community count evolution (Adaptive Frontier)", fontsize=12)
     ax.grid(True, alpha=0.3)
     plt.tight_layout()
-    path = f"results/community_evolution_{{dataset_name}}.png"
+    path = f"results/community_evolution_{dataset_name}.png"
     plt.savefig(path, dpi=150, bbox_inches="tight")
     plt.close()
-    print(f"  Saved -> {{path}}")
-
+    print(f"  Saved -> {path}")
 
 def plot_frontier_adaptation(results: dict, dataset_name: str):
     fig, ax1 = plt.subplots(figsize=(12, 4))
@@ -460,13 +451,12 @@ def plot_frontier_adaptation(results: dict, dataset_name: str):
     ax2.set_ylabel("Adaptive threshold", fontsize=10, color="#444")
     ax2.tick_params(axis="y", labelcolor="#444")
 
-    plt.title(f"{{dataset_name}} — Frontier adaptation over time", fontsize=12)
+    plt.title(f"{dataset_name} — Frontier adaptation over time", fontsize=12)
     plt.tight_layout()
-    path = f"results/frontier_adaptation_{{dataset_name}}.png"
+    path = f"results/frontier_adaptation_{dataset_name}.png"
     plt.savefig(path, dpi=150, bbox_inches="tight")
     plt.close()
-    print(f"  Saved -> {{path}}")
-
+    print(f"  Saved -> {path}")
 
 def save_benchmark_table(results: dict, dataset_name: str):
     rows = []
@@ -476,28 +466,27 @@ def save_benchmark_table(results: dict, dataset_name: str):
         q_vals = [v for v in results["modularity"][algo] if not np.isnan(v)]
         rows.append({
             "Algorithm": LABELS[algo],
-            "Mean time (s)": f"{{np.mean(results['time_s'][algo]):.4f}}",
-            "Median time (s)": f"{{np.median(results['time_s'][algo]):.4f}}",
-            "Mean speedup": f"{{np.mean(sp):.1f}}x" if algo != "static" else "1.0x",
-            "Mean modularity Q": f"{{np.mean(q_vals):.4f}}" if q_vals else "nan",
-            "Mean #communities": f"{{np.mean(results['n_communities'][algo]):.1f}}",
+            "Mean time (s)": f"{np.mean(results['time_s'][algo]):.4f}",
+            "Median time (s)": f"{np.median(results['time_s'][algo]):.4f}",
+            "Mean speedup": f"{np.mean(sp):.1f}x" if algo != "static" else "1.0x",
+            "Mean modularity Q": f"{np.mean(q_vals):.4f}" if q_vals else "nan",
+            "Mean #communities": f"{np.mean(results['n_communities'][algo]):.1f}",
             "Q vs Static (%)": (
-                f"{{(np.mean(q_vals)/max(np.mean([v for v in results['modularity']['static'] if not np.isnan(v)]),1e-9)-1)*100:+.1f}}%"
+                f"{(np.mean(q_vals)/max(np.mean([v for v in results['modularity']['static'] if not np.isnan(v)]),1e-9)-1)*100:+.1f}%"
                 if algo != "static" and q_vals else "—"
             ),
         })
 
     # Add AF frontier fraction
-    rows[-1]["Mean frontier frac"] = f"{{np.mean(results['n_affected_af']) / max(n_sensors_total, 1):.3f}}"
+    rows[-1]["Mean frontier frac"] = f"{np.mean(results['n_affected_af']) / max(n_sensors_total, 1):.3f}"
 
     df = pd.DataFrame(rows)
-    print(f"\n  === Benchmark Table ({{dataset_name}}) ===")
+    print(f"\n  === Benchmark Table ({dataset_name}) ===")
     print(df.to_string(index=False))
-    path = f"results/benchmark_table_{{dataset_name}}.csv"
+    path = f"results/benchmark_table_{dataset_name}.csv"
     df.to_csv(path, index=False)
-    print(f"  Saved -> {{path}}")
+    print(f"  Saved -> {path}")
     return df
-
 
 def save_timeseries_csv(results: dict, dataset_name: str):
     df = pd.DataFrame({
@@ -524,11 +513,10 @@ def save_timeseries_csv(results: dict, dataset_name: str):
         "frontier_frac_af": results["frontier_frac_af"],
     })
 
-    path = f"results/benchmark_timeseries_{{dataset_name}}.csv"
+    path = f"results/benchmark_timeseries_{dataset_name}.csv"
     df.to_csv(path, index=False)
-    print(f"  Saved -> {{path}}")
+    print(f"  Saved -> {path}")
     return df
-
 
 def main():
     parser = argparse.ArgumentParser(
@@ -575,17 +563,17 @@ def main():
     print("=" * 72)
     print("Adaptive Frontier Louvain — Dynamic Community Detection")
     print("=" * 72)
-    print(f"  Dataset:        {{args.dataset}}")
-    print(f"  Batches:        {{args.n_batches}}")
-    print(f"  Window:         {{args.window}} steps ({{args.window*5}} min)")
-    print(f"  DF frontier:    {{args.frontier_thr}}")
-    print(f"  AF percentile:  {{args.af_percentile}}")
-    print(f"  AF min thr:     {{args.af_min_thr}}")
-    print(f"  AF max frac:    {{args.af_max_frac}}")
-    print(f"  AF degree α:    {{args.af_degree_alpha}}")
-    print(f"  AF neigh scale: {{args.af_neighbor_scale}}")
+    print(f"  Dataset:        {args.dataset}")
+    print(f"  Batches:        {args.n_batches}")
+    print(f"  Window:         {args.window} steps ({args.window*5} min)")
+    print(f"  DF frontier:    {args.frontier_thr}")
+    print(f"  AF percentile:  {args.af_percentile}")
+    print(f"  AF min thr:     {args.af_min_thr}")
+    print(f"  AF max frac:    {args.af_max_frac}")
+    print(f"  AF degree α:    {args.af_degree_alpha}")
+    print(f"  AF neigh scale: {args.af_neighbor_scale}")
     print_gpu_summary()
-    print()  
+    print()
 
     # Load data
     if args.dataset in ["metr-la", "pems-bay"]:
@@ -599,7 +587,7 @@ def main():
             speeds, timestamps, sensor_ids = load_pems_bay(args.data_path)
 
         N, T = speeds.shape[1], speeds.shape[0]
-        print(f"  Sensors: {{N}} | Timesteps: {{T}}")
+        print(f"  Sensors: {N} | Timesteps: {T}")
 
         print("Building adjacency matrix...")
         if args.adj_pkl and os.path.exists(args.adj_pkl):
@@ -615,7 +603,7 @@ def main():
         adj = load_snap_roadnet(args.snap_path, max_nodes=args.snap_nodes)
         N = adj.shape[0]
         speeds, timestamps = synthetic_traffic(args.snap_timesteps, N)
-        dataset_name = f"snap_{{os.path.splitext(os.path.basename(args.snap_path))[0]}}" 
+        dataset_name = f"snap_{os.path.splitext(os.path.basename(args.snap_path))[0]}"
 
     # Run benchmark
     print("\nRunning benchmark (Static / ND / DF / AF Louvain)...")
@@ -634,7 +622,7 @@ def main():
         af_neighbor_scale=args.af_neighbor_scale,
     )
     elapsed = time.perf_counter() - t_total
-    print(f"\n  Total benchmark time: {{elapsed:.1f}}s")
+    print(f"\n  Total benchmark time: {elapsed:.1f}s")
 
     # Outputs
     print("\nGenerating outputs...")
@@ -646,7 +634,6 @@ def main():
     save_timeseries_csv(results, dataset_name)
 
     print("\nAll outputs saved to ./results/")
-
 
 if __name__ == "__main__":
     main()
