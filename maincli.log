@@ -1,0 +1,134 @@
+python adaptive_frontier_traffic.py \
+  --dataset metr-la \
+  --data_path ./data/metr-la.h5 \
+  --adj_pkl ./data/adj_mx_metr.pkl
+
+(.venv) arihant-gupta@arihant-gupta-Vostro-3500:/media/arihant-gupta/GARIHANT/Bennett University/Sem 6/CSET347 - Social Network Analysis/Project/phase1_new/sna_v3$ python adaptive_frontier_traffic.py \
+  --dataset metr-la \
+  --data_path ./data/metr-la.h5 \
+  --adj_pkl ./data/adj_mx_metr.pkl
+[GPU] PyTorch not installed — trying CuPy...
+[GPU] CuPy unavailable (ModuleNotFoundError: No module named 'cupy')
+[GPU] Falling back to NumPy CPU.
+[GPU] Running on CPU (NumPy). Install PyTorch for GPU acceleration:
+      pip install torch --index-url https://download.pytorch.org/whl/cu121
+========================================================================
+Adaptive Frontier Louvain — Dynamic Community Detection
+========================================================================
+  Dataset:        metr-la
+  Batches:        200
+  Window:         12 steps (60 min)
+  DF frontier:    0.001
+  AF percentile:  0.9
+  AF min thr:     0.0001
+  AF max frac:    0.2
+  AF degree α:    0.3
+  AF neigh scale: 0.5
+  Compute: CPU only
+
+Loading traffic data...
+  Sensor ID sample: ['773869', '767541', '767542'] … (total 207)
+  Sensors: 207 | Timesteps: 34272
+Building adjacency matrix...
+  adj_mx.pkl loaded: shape=(207, 207)  edges=757  density=0.0355
+  Sensor ordering: h5 and adj_mx.pkl match perfectly.
+
+Running benchmark (Static / ND / DF / AF Louvain)...
+  Initialising with Static Louvain on first window...
+  Running 200 batches (window=12, batch=1, N=207)...
+  Batches: 100%|████████████████████| 200/200 [00:49<00:00,  4.05it/s]
+
+  Total benchmark time: 49.4s
+
+Generating outputs...
+  Saved -> results/modularity_over_time_metr-la.png
+  Saved -> results/speedup_comparison_metr-la.png
+  Saved -> results/community_evolution_metr-la.png
+  Saved -> results/frontier_adaptation_metr-la.png
+
+  === Benchmark Table (metr-la) ===
+             Algorithm Mean time (s) Median time (s) Mean speedup Mean modularity Q Mean #communities Q vs Static (%) Mean frontier frac
+        Static Louvain        0.1487          0.1517         1.0x            0.6512              27.6               —                NaN
+            ND Louvain        0.0568          0.0137        15.4x            0.6163               6.5           -5.4%                NaN
+            DF Louvain        0.0072          0.0074        22.5x            0.6092               6.6           -6.4%                NaN
+Adaptive Frontier (AF)        0.0014          0.0013       127.7x            0.6119               8.7           -6.0%              0.222
+  Saved -> results/benchmark_table_metr-la.csv
+  Saved -> results/benchmark_timeseries_metr-la.csv
+
+All outputs saved to ./results/
+
+
+
+python adaptive_frontier_traffic.py \
+  --dataset pems-bay \
+  --data_path ./data/pems-bay.h5 \
+  --adj_pkl ./data/adj_mx_bay.pkl
+
+(.venv) arihant-gupta@arihant-gupta-Vostro-3500:/media/arihant-gupta/GARIHANT/Bennett University/Sem 6/CSET347 - Social Network Analysis/Project/phase1_new/sna_v3$ python adaptive_frontier_traffic.py \
+  --dataset pems-bay \
+  --data_path ./data/pems-bay.h5 \
+  --adj_pkl ./data/adj_mx_bay.pkl
+[GPU] PyTorch not installed — trying CuPy...
+[GPU] CuPy unavailable (ModuleNotFoundError: No module named 'cupy')
+[GPU] Falling back to NumPy CPU.
+[GPU] Running on CPU (NumPy). Install PyTorch for GPU acceleration:
+      pip install torch --index-url https://download.pytorch.org/whl/cu121
+========================================================================
+Adaptive Frontier Louvain — Dynamic Community Detection
+========================================================================
+  Dataset:        pems-bay
+  Batches:        200
+  Window:         12 steps (60 min)
+  DF frontier:    0.001
+  AF percentile:  0.9
+  AF min thr:     0.0001
+  AF max frac:    0.2
+  AF degree α:    0.3
+  AF neigh scale: 0.5
+  Compute: CPU only
+
+Loading traffic data...
+  Sensor ID sample: ['400001', '400017', '400030'] … (total 325)
+  Sensors: 325 | Timesteps: 52116
+Building adjacency matrix...
+  adj_mx.pkl loaded: shape=(325, 325)  edges=1184  density=0.0225
+  Sensor ordering: h5 and adj_mx.pkl match perfectly.
+
+Running benchmark (Static / ND / DF / AF Louvain)...
+  Initialising with Static Louvain on first window...
+  Running 200 batches (window=12, batch=1, N=325)...
+  Batches: 100%|████████████████████| 200/200 [00:52<00:00,  3.80it/s]
+
+  Total benchmark time: 52.6s
+
+Generating outputs...
+  Saved -> results/modularity_over_time_pems-bay.png
+  Saved -> results/speedup_comparison_pems-bay.png
+  Saved -> results/community_evolution_pems-bay.png
+  Saved -> results/frontier_adaptation_pems-bay.png
+
+  === Benchmark Table (pems-bay) ===
+             Algorithm Mean time (s) Median time (s) Mean speedup Mean modularity Q Mean #communities Q vs Static (%) Mean frontier frac
+        Static Louvain        0.1327          0.0487         1.0x            0.7824              52.2               —                NaN
+            ND Louvain        0.0765          0.0200         7.3x            0.7934              22.4           +1.4%                NaN
+            DF Louvain        0.0153          0.0141        11.1x            0.7920              22.4           +1.2%                NaN
+Adaptive Frontier (AF)        0.0031          0.0028        57.6x            0.7732              24.9           -1.2%              0.225
+  Saved -> results/benchmark_table_pems-bay.csv
+  Saved -> results/benchmark_timeseries_pems-bay.csv
+
+All outputs saved to ./results/
+
+
+python adaptive_frontier_traffic.py \
+  --dataset snap \
+  --snap_path ./data/roadNet-CA.txt \
+  --snap_nodes 1500 \
+  --snap_timesteps 2000
+
+
+python adaptive_frontier_traffic.py \
+  --dataset snap \
+  --snap_path ./data/roadNet-CA.txt \
+  --snap_nodes 500000 \
+  --snap_timesteps 2000
+  

@@ -155,43 +155,54 @@ os.makedirs("results", exist_ok=True)
 # =============================================================================
 def load_metr_la(h5_path: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
-    Load METR-LA dataset.
+    Load METR-LA / PEMS-BAY dataset.
 
-    File structure (liyaguang/DCRNN format):
-      /df/block0_values  — shape (34272, 207)  speed readings [mph]
-      /df/block0_items   — sensor IDs
-      /df/axis1          — UNIX timestamps (seconds)
-
-    Returns
-    -------
-    speeds     : (T, N)  float32 — speed per timestamp per sensor
-    timestamps : (T,)    int64   — UNIX timestamp seconds
-    sensor_ids : (N,)    str array
+    Handles:
+      - /df/block0_values (DCRNN METR-LA)
+      - /speed/block0_values (PEMS-BAY variant you have)
+      - /speed as dataset (other variants)
+      - generic fallback: first dataset
     """
     with h5py.File(h5_path, "r") as f:
-        # Try both known key layouts
         if "df" in f:
             speeds     = f["df"]["block0_values"][:]          # (T, N)
             timestamps = f["df"]["axis1"][:]
             sensor_ids = f["df"]["block0_items"][:]
+
         elif "speed" in f:
-            speeds     = f["speed"][:]
-            timestamps = np.arange(speeds.shape[0]) * 300     # 5-min intervals
-            sensor_ids = np.arange(speeds.shape[1]).astype(str)
+            speed_obj = f["speed"]
+            if isinstance(speed_obj, h5py.Dataset):
+                speeds = speed_obj[:]
+                timestamps = np.arange(speeds.shape[0]) * 300
+                sensor_ids = np.arange(speeds.shape[1]).astype(str)
+            else:
+                # speed is a group with block0_values
+                speeds     = speed_obj["block0_values"][:]
+                timestamps = speed_obj["axis1"][:]
+                sensor_ids = speed_obj["block0_items"][:]
+
         else:
-            # Generic fallback: first dataset found
-            key = list(f.keys())[0]
-            speeds     = f[key][:]
+            # fallback: first dataset anywhere
+            def _first_dataset(group):
+                for k in group.keys():
+                    obj = group[k]
+                    if isinstance(obj, h5py.Dataset):
+                        return obj[:]
+                    elif isinstance(obj, h5py.Group):
+                        res = _first_dataset(obj)
+                        if res is not None:
+                            return res
+                return None
+
+            speeds = _first_dataset(f)
+            if speeds is None:
+                raise ValueError("No dataset found in H5 file.")
             timestamps = np.arange(speeds.shape[0]) * 300
             sensor_ids = np.arange(speeds.shape[1]).astype(str)
 
     speeds = speeds.astype(np.float32)
-    # METR-LA encodes missing readings as 0.  Do NOT convert to NaN here —
-    # NaN propagates through the correlation matmul and makes Q = nan.
-    # Instead we impute in compute_correlation_weights_gpu using ffill/bfill.
-    # (The impute step is skipped if there are no zeros at all.)
 
-    # sensor_ids from h5 may be bytes (b'773869') — decode to str
+    # sensor_ids may be bytes
     if sensor_ids.dtype.kind == 'S' or (sensor_ids.size > 0 and
             isinstance(sensor_ids.flat[0], (bytes, np.bytes_))):
         sensor_ids = np.array([s.decode() if isinstance(s, (bytes, np.bytes_))
