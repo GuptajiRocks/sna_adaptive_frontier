@@ -1,0 +1,10 @@
+numpy
+pandas
+matplotlib
+tqdm
+h5py
+scipy
+
+# Optional GPU acceleration (install manually if you have CUDA)
+# torch
+# cupy-cuda12x
