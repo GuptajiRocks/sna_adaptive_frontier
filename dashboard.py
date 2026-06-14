@@ -30,7 +30,7 @@ def fig_lines(df: pd.DataFrame, x, series: dict, title: str, ytitle: str):
         yaxis_title=ytitle,
         template="plotly_white",
         height=320,
-        margin=dict(l=30, r=15, t=45, b=30),
+        margin=dict(l=30, r=15, t=60, b=40),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
     )
     return fig
@@ -63,64 +63,161 @@ def layout_image_block(dataset: str, batch: int):
         style={"border": "1px solid #ddd", "padding": "10px", "borderRadius": "6px"}
     )
 
-app = Dash(__name__)
+app = Dash(__name__, meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}])
 app.title = "Adaptive Frontier Louvain Dashboard"
 
 app.layout = html.Div(
     [
-        html.H2("Adaptive Frontier Louvain — Results Dashboard"),
-
+        # Header block (separate from plots)
         html.Div(
             [
-                html.Label("Dataset"),
-                dcc.Dropdown(
-                    id="dataset",
-                    options=[{"label": k, "value": k} for k in DATASET_TO_TIMESERIES.keys()],
-                    value="metr-la",
-                    clearable=False,
-                    style={"width": "220px"},
+                html.H2("Adaptive Frontier Louvain — Results Dashboard",
+                        style={"margin": "0 0 10px 0"}),
+
+                html.Div(
+                    [
+                        html.Div(
+                            [
+                                html.Label("Dataset", style={"fontWeight": "600"}),
+                                dcc.Dropdown(
+                                    id="dataset",
+                                    options=[{"label": k, "value": k} for k in DATASET_TO_TIMESERIES.keys()],
+                                    value="metr-la",
+                                    clearable=False,
+                                ),
+                            ],
+                            style={"minWidth": "240px", "flex": "0 0 240px"},
+                        ),
+
+                        html.Div(
+                            [
+                                html.Label("Batch", style={"fontWeight": "600"}),
+                                dcc.Slider(
+                                    id="batch",
+                                    min=0, max=199, step=1, value=0,
+                                    tooltip={"placement": "bottom", "always_visible": False},
+                                ),
+                            ],
+                            style={"flex": "1", "paddingLeft": "18px"},
+                        ),
+                    ],
+                    style={
+                        "display": "flex",
+                        "gap": "12px",
+                        "alignItems": "center",
+                    },
                 ),
             ],
-            style={"display": "inline-block", "marginRight": "25px"},
+            style={
+                "position": "sticky",
+                "top": "0",
+                "zIndex": "999",
+                "background": "white",
+                "padding": "14px 12px 12px 12px",
+                "borderBottom": "1px solid #e5e5e5",
+            },
         ),
 
+        # Content area
         html.Div(
             [
-                html.Label("Batch"),
-                dcc.Slider(
-                    id="batch",
-                    min=0, max=199, step=1, value=0,
-                    tooltip={"placement": "bottom", "always_visible": False},
+                html.Div(
+                    [
+                        dcc.Graph(id="fig_time", config={"displayModeBar": False}),
+                    ],
+                    style={"flex": "1", "minWidth": "520px"},
+                ),
+                html.Div(
+                    [
+                        dcc.Graph(id="fig_speedup", config={"displayModeBar": False}),
+                    ],
+                    style={"flex": "1", "minWidth": "520px"},
                 ),
             ],
-            style={"display": "inline-block", "width": "65%"},
-        ),
-
-        html.Hr(),
-
-        html.Div(
-            [
-                html.Div([dcc.Graph(id="fig_time")], style={"width": "50%", "display": "inline-block", "verticalAlign": "top"}),
-                html.Div([dcc.Graph(id="fig_speedup")], style={"width": "50%", "display": "inline-block", "verticalAlign": "top"}),
-            ]
+            style={"display": "flex", "flexWrap": "wrap", "gap": "12px", "paddingTop": "12px"},
         ),
 
         html.Div(
             [
-                html.Div([dcc.Graph(id="fig_modularity")], style={"width": "50%", "display": "inline-block", "verticalAlign": "top"}),
-                html.Div([dcc.Graph(id="fig_frontier")], style={"width": "50%", "display": "inline-block", "verticalAlign": "top"}),
-            ]
+                html.Div([dcc.Graph(id="fig_modularity", config={"displayModeBar": False})],
+                         style={"flex": "1", "minWidth": "520px"}),
+                html.Div([dcc.Graph(id="fig_frontier", config={"displayModeBar": False})],
+                         style={"flex": "1", "minWidth": "520px"}),
+            ],
+            style={"display": "flex", "flexWrap": "wrap", "gap": "12px"},
         ),
 
         html.Div(
             [
-                html.Div([dcc.Graph(id="fig_comms")], style={"width": "50%", "display": "inline-block", "verticalAlign": "top"}),
-                html.Div([html.Div(id="snapshot_panel")], style={"width": "50%", "display": "inline-block", "verticalAlign": "top"}),
-            ]
+                html.Div([dcc.Graph(id="fig_comms", config={"displayModeBar": False})],
+                         style={"flex": "1", "minWidth": "520px"}),
+                html.Div([html.Div(id="snapshot_panel")],
+                         style={"flex": "1", "minWidth": "520px"}),
+            ],
+            style={"display": "flex", "flexWrap": "wrap", "gap": "12px", "paddingBottom": "18px"},
         ),
     ],
-    style={"padding": "18px", "fontFamily": "system-ui, -apple-system, Segoe UI, Roboto, sans-serif"},
+    style={
+        "padding": "0",  # header handles padding now
+        "fontFamily": "system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+    },
 )
+
+# app.layout = html.Div(
+#     [
+#         html.H2("Adaptive Frontier Louvain — Results Dashboard"),
+
+#         html.Div(
+#             [
+#                 html.Label("Dataset"),
+#                 dcc.Dropdown(
+#                     id="dataset",
+#                     options=[{"label": k, "value": k} for k in DATASET_TO_TIMESERIES.keys()],
+#                     value="metr-la",
+#                     clearable=False,
+#                     style={"width": "220px"},
+#                 ),
+#             ],
+#             style={"display": "inline-block", "marginRight": "25px"},
+#         ),
+
+#         html.Div(
+#             [
+#                 html.Label("Batch"),
+#                 dcc.Slider(
+#                     id="batch",
+#                     min=0, max=199, step=1, value=0,
+#                     tooltip={"placement": "bottom", "always_visible": False},
+#                 ),
+#             ],
+#             style={"display": "inline-block", "width": "65%"},
+#         ),
+
+#         html.Hr(),
+
+#         html.Div(
+#             [
+#                 html.Div([dcc.Graph(id="fig_time")], style={"width": "50%", "display": "inline-block", "verticalAlign": "top"}),
+#                 html.Div([dcc.Graph(id="fig_speedup")], style={"width": "50%", "display": "inline-block", "verticalAlign": "top"}),
+#             ]
+#         ),
+
+#         html.Div(
+#             [
+#                 html.Div([dcc.Graph(id="fig_modularity")], style={"width": "50%", "display": "inline-block", "verticalAlign": "top"}),
+#                 html.Div([dcc.Graph(id="fig_frontier")], style={"width": "50%", "display": "inline-block", "verticalAlign": "top"}),
+#             ]
+#         ),
+
+#         html.Div(
+#             [
+#                 html.Div([dcc.Graph(id="fig_comms")], style={"width": "50%", "display": "inline-block", "verticalAlign": "top"}),
+#                 html.Div([html.Div(id="snapshot_panel")], style={"width": "50%", "display": "inline-block", "verticalAlign": "top"}),
+#             ]
+#         ),
+#     ],
+#     style={"padding": "18px", "fontFamily": "system-ui, -apple-system, Segoe UI, Roboto, sans-serif"},
+# )
 
 @app.callback(
     Output("batch", "max"),
